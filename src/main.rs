@@ -10,33 +10,33 @@ fn main() {
     let options = args[1..java_file_index].to_vec();
     let arguments = &args[java_file_index+1..];
 
-    let compile_files = compile_files(&options, java_file);
+    let compile_targets = compile_targets(&options, java_file);
 
-    let result = compile(&options, &compile_files, arguments);
+    let result = compile(&options, &compile_targets, arguments);
     if result.is_err() { return; }
     run(&options, java_file, arguments);
     
 }
 
-fn compile_files(options: &[String], java_file: &str) -> Vec<String> {
+fn compile_targets(options: &[String], java_file: &str) -> Vec<String> {
     let mut options_r = options.to_vec();
     options_r.reverse();
-    let mut compile_files = options_r
+    let mut compile_targets = options_r
         .into_iter()
         .filter(|x| x.ends_with(".java"))
         .collect::<Vec<String>>();
 
-    if compile_files.is_empty() {
-        compile_files.push(java_file.to_owned());
+    if compile_targets.is_empty() {
+        compile_targets.push(java_file.to_owned());
     }
 
-    compile_files
+    compile_targets
 }
 
-fn compile(options: &Vec<String>, compile_files: &[String], arguments: &[String]) -> Result<(), ()>{
+fn compile(options: &Vec<String>, compile_targets: &[String], arguments: &[String]) -> Result<(), ()>{
     let child_compile = Command::new("javac")
         .args(options)
-        .args(compile_files)
+        .args(compile_targets)
         .args(arguments)
         .stdin(Stdio::inherit())
         .stdout(Stdio::inherit())
