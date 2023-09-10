@@ -1,4 +1,5 @@
 use std::{process::{Command, Stdio}, env};
+
 fn main() {
     let args = env::args().collect::<Vec<String>>();
     let java_file_index = args
@@ -18,6 +19,12 @@ fn main() {
     run(options, java_file, arguments);
 }
 
+/// Returns a vector of all the files to be compiled
+/// 
+/// # Arguments
+/// 
+/// * `options` - The options passed to lava
+/// * `java_file` - The java file to be compiled
 fn compile_targets(options: &[String], java_file: &str) -> Vec<String> {
     let mut options_r = options.to_vec();
     options_r.reverse();
@@ -33,6 +40,13 @@ fn compile_targets(options: &[String], java_file: &str) -> Vec<String> {
     compile_targets
 }
 
+/// Compiles the java files
+/// 
+/// # Arguments
+/// 
+/// * `options` - The options passed to lava
+/// * `compile_targets` - The files to be compiled
+/// * `arguments` - The arguments passed to the java program
 fn compile(options: &[String], compile_targets: &[String], arguments: &[String]) -> Result<(), ()>{
     let child_compile = Command::new("javac")
         .args(options)
@@ -52,10 +66,17 @@ fn compile(options: &[String], compile_targets: &[String], arguments: &[String])
     Ok(())
 }
 
+/// Runs the java program
+/// 
+/// # Arguments
+/// 
+/// * `options` - The options passed to lava
+/// * `java_file` - The java file to be compiled
+/// * `arguments` - The arguments passed to the java program
 fn run(options: &[String], java_file: &str, arguments: &[String]) {
     let child_run: std::process::Child = Command::new("java")
         .args(options)
-        .arg(java_file.split('.').next().unwrap())
+        .arg(java_file.split('.').next().expect("🌀lava: no java file found"))
         .args(arguments)
         .stdin(Stdio::inherit())
         .stdout(Stdio::inherit())
@@ -63,7 +84,7 @@ fn run(options: &[String], java_file: &str, arguments: &[String]) {
         .expect("🌀lava: failed to execute child");
 
     let output = child_run.wait_with_output().expect("🌀lava: failed to wait on child(execution)");
-    if output.status.code().unwrap() != 0 {
+    if output.status.code().expect("🌀lava: failed to get exit code") != 0 {
         println!("🌀lava: execution failed");
     }
 }
