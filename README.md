@@ -1,7 +1,7 @@
 # lava
 
 ## Description
-Javaのコンパイルと実行を一度にしたいから作った(;o;)
+Javaのコンパイルと実行を一度に行う簡単なツール．
 
 ## Install
 `cargo`が必要．
@@ -26,7 +26,7 @@ lava [options] [source files] <main file> [args...]
 zshで実行
 
 - ClassAをコンパイル，実行する
-    - 依存関係のコンパイルはjavacにより行われる
+    - 依存関係のコンパイルは`javac`により行われる
     - ClassA.main(String[])が実行される
 ```sh
 lava ClassA.java
