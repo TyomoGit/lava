@@ -3,10 +3,10 @@
 ## Description
 Javaのコンパイルと実行を一度にしたいから作った(;o;)
 
-## Build
-以下を実行すると，成果物が`target/release/lava`に生成される．
+## Install
+`cargo`が必要．
 ```sh
-cargo build --release
+cargo install --git https://github.com/TyomoGit/lava.git
 ```
 
 ## Usage
