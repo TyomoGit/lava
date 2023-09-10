@@ -7,15 +7,15 @@ fn main() {
         .expect("🌀lava: no java file found");
 
     let java_file = &args[java_file_index];
-    let options = args[1..java_file_index].to_vec();
+    let options = &args[1..java_file_index];
     let arguments = &args[java_file_index+1..];
 
-    let compile_targets = compile_targets(&options, java_file);
+    let compile_targets = compile_targets(options, java_file);
 
-    let result = compile(&options, &compile_targets, arguments);
+    let result = compile(options, &compile_targets, arguments);
     if result.is_err() { return; }
-    run(&options, java_file, arguments);
-    
+
+    run(options, java_file, arguments);
 }
 
 fn compile_targets(options: &[String], java_file: &str) -> Vec<String> {
@@ -33,7 +33,7 @@ fn compile_targets(options: &[String], java_file: &str) -> Vec<String> {
     compile_targets
 }
 
-fn compile(options: &Vec<String>, compile_targets: &[String], arguments: &[String]) -> Result<(), ()>{
+fn compile(options: &[String], compile_targets: &[String], arguments: &[String]) -> Result<(), ()>{
     let child_compile = Command::new("javac")
         .args(options)
         .args(compile_targets)
@@ -52,7 +52,7 @@ fn compile(options: &Vec<String>, compile_targets: &[String], arguments: &[Strin
     Ok(())
 }
 
-fn run(options: &Vec<String>, java_file: &str, arguments: &[String]) {
+fn run(options: &[String], java_file: &str, arguments: &[String]) {
     let child_run: std::process::Child = Command::new("java")
         .args(options)
         .arg(java_file.split('.').next().unwrap())
