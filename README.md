@@ -4,7 +4,7 @@
 Javaのコンパイルと実行を一度に行う簡単なツール．
 
 ## Install
-`cargo`が必要．
+Rustに付属する [cargo](https://www.rust-lang.org/ja/tools/install) が必要．
 ```sh
 cargo install --git https://github.com/TyomoGit/lava.git
 ```
@@ -42,7 +42,7 @@ lava -cp class/path/ ClassA.java
 lava */*.java ClassA.java
 ```
 
-- 実行とコンパイルにオプションを指定し，`My*.java`に一致するファイルをコンパイルし，ClassAを実行する
+- 実行とコンパイルにオプションを指定し，`*/*.java`に一致するファイルをコンパイルし，ClassAを実行する
 ```sh
-lava -cp class/path/ My*.java MyMainClass.java
+lava -cp class/path/ */*.java ClassA.java
 ```
