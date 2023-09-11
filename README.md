@@ -4,7 +4,7 @@
 Javaのコンパイルと実行を一度に行う簡単なツール．
 
 ## Install
-Rustに付属する [cargo](https://www.rust-lang.org/ja/tools/install) が必要．
+[Rust](https://www.rust-lang.org/ja/tools/install)に付属するcargoが必要．
 ```sh
 cargo install --git https://github.com/TyomoGit/lava.git
 ```
