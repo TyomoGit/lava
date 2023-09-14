@@ -16,7 +16,7 @@ lava [options] [source files] <main file> [args...]
 ```
 |||
 |:---|:---|
-|`options`|javacとjavaに指定するオプション<br>（--classpathなど）|
+|`options`|javacとjavaに指定するオプション<br>（-classpathなど）|
 |`source files`|コンパイルするファイル|
 |`main file`|Main Classが記述されているファイル<br>（.javaも含めて書く）|
 |`args...`|javaアプリケーションに指定する引数|
