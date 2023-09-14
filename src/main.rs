@@ -8,15 +8,15 @@ fn main() {
         .expect("🌀lava: no java file found");
 
     let java_file = &args[java_file_index];
-    let options = &args[1..java_file_index];
+    let options_and_compile_targets = &args[1..java_file_index];
     let arguments = &args[java_file_index+1..];
 
-    let compile_targets = compile_targets(options, java_file);
+    let (options, compile_targets) = calc_compile_options_and_targets(options_and_compile_targets, java_file);
 
-    let result = compile(options, &compile_targets, arguments);
+    let result = compile(&options, &compile_targets);
     if result.is_err() { return; }
 
-    run(options, java_file, arguments);
+    run(&options, java_file, arguments);
 }
 
 /// Returns a vector of all the files to be compiled
@@ -25,19 +25,24 @@ fn main() {
 /// 
 /// * `options` - The options passed to lava
 /// * `java_file` - The java file to be compiled
-fn compile_targets(options: &[String], java_file: &str) -> Vec<String> {
-    let mut options_r = options.to_vec();
-    options_r.reverse();
-    let mut compile_targets = options_r
-        .into_iter()
-        .filter(|x| x.ends_with(".java"))
-        .collect::<Vec<String>>();
+fn calc_compile_options_and_targets<'a>(options_and_ctargets: &'a[String], java_file: &'a str) -> (Vec<&'a str>, Vec<&'a str>) {
 
-    if compile_targets.is_empty() {
-        compile_targets.push(java_file.to_owned());
+    let mut options = Vec::<&str>::new();
+    let mut compile_targets = Vec::<&str>::new();
+
+    for element in options_and_ctargets {
+        if element.ends_with(".java") {
+            compile_targets.push(element);
+        } else {
+            options.push(element);
+        }
     }
 
-    compile_targets
+    if compile_targets.is_empty() {
+        compile_targets.push(java_file);
+    }
+
+    (options, compile_targets)
 }
 
 /// Compiles the java files
@@ -47,11 +52,11 @@ fn compile_targets(options: &[String], java_file: &str) -> Vec<String> {
 /// * `options` - The options passed to lava
 /// * `compile_targets` - The files to be compiled
 /// * `arguments` - The arguments passed to the java program
-fn compile(options: &[String], compile_targets: &[String], arguments: &[String]) -> Result<(), ()>{
+fn compile(options: &[&str], compile_targets: &[&str]) -> Result<(), ()>{
     let child_compile = Command::new("javac")
         .args(options)
         .args(compile_targets)
-        .args(arguments)
+        // .args(arguments)
         .stdin(Stdio::inherit())
         .stdout(Stdio::inherit())
         .spawn()
@@ -73,7 +78,7 @@ fn compile(options: &[String], compile_targets: &[String], arguments: &[String])
 /// * `options` - The options passed to lava
 /// * `java_file` - The java file to be compiled
 /// * `arguments` - The arguments passed to the java program
-fn run(options: &[String], java_file: &str, arguments: &[String]) {
+fn run(options: &[&str], java_file: &str, arguments: &[String]) {
     let child_run: std::process::Child = Command::new("java")
         .args(options)
         .arg(java_file.split('.').next().expect("🌀lava: no java file found"))
