@@ -13,9 +13,7 @@ fn main() {
 
     let (options, compile_targets) = calc_compile_options_and_targets(options_and_compile_targets, java_file);
 
-    let result = compile(&options, &compile_targets);
-    if result.is_err() { return; }
-
+    compile(&options, &compile_targets);
     run(&options, java_file, arguments);
 }
 
@@ -52,7 +50,7 @@ fn calc_compile_options_and_targets<'a>(options_and_ctargets: &'a[String], java_
 /// * `options` - The options passed to lava
 /// * `compile_targets` - The files to be compiled
 /// * `arguments` - The arguments passed to the java program
-fn compile(options: &[&str], compile_targets: &[&str]) -> Result<(), ()>{
+fn compile(options: &[&str], compile_targets: &[&str]) {
     let child_compile = Command::new("javac")
         .args(options)
         .args(compile_targets)
@@ -64,11 +62,8 @@ fn compile(options: &[&str], compile_targets: &[&str]) -> Result<(), ()>{
 
     let output = child_compile.wait_with_output().expect("🌀lava: failed to wait on child(compilation)");
     if output.status.code().unwrap() != 0 {
-        println!("🌀lava: compilation failed");
-        return Err(());
+        panic!("🌀lava: compilation failed");
     }
-
-    Ok(())
 }
 
 /// Runs the java program
