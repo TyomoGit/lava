@@ -1,11 +1,14 @@
-use std::{process::{Command, Stdio}, env};
+use std::{process::{Command, Stdio}, env, io::{Result, Error, ErrorKind}};
 
 fn main() {
     let args = env::args().collect::<Vec<String>>();
-    let java_file_index = args
+    let java_file_index = match args
         .iter()
-        .rposition(|x| x.ends_with(".java"))
-        .expect("🌀lava: no java file found");
+        .rposition(|x| x.ends_with(".java")) {
+            Some(index) => index,
+            None => { println!("🌀lava: no java file found"); return;}
+        };
+        
 
     let java_file = &args[java_file_index];
     let options_and_compile_targets = &args[1..java_file_index];
@@ -13,8 +16,14 @@ fn main() {
 
     let (options, compile_targets) = calc_compile_options_and_targets(options_and_compile_targets, java_file);
 
-    compile(&options, &compile_targets);
-    run(&options, java_file, arguments);
+    if let Err(e) = compile(&options, &compile_targets) {
+        println!("{}", e);
+        return;
+    }
+
+    if let Err(e) = run(&options, java_file, arguments) {
+        println!("{}", e);
+    }
 }
 
 /// Returns a vector of all the files to be compiled
@@ -37,7 +46,7 @@ fn calc_compile_options_and_targets<'a>(options_and_ctargets: &'a[String], java_
     }
 
     if compile_targets.is_empty() {
-        compile_targets.push(java_file);
+        compile_targets = vec![java_file];
     }
 
     (options, compile_targets)
@@ -50,20 +59,20 @@ fn calc_compile_options_and_targets<'a>(options_and_ctargets: &'a[String], java_
 /// * `options` - The options passed to lava
 /// * `compile_targets` - The files to be compiled
 /// * `arguments` - The arguments passed to the java program
-fn compile(options: &[&str], compile_targets: &[&str]) {
-    let child_compile = Command::new("javac")
+fn compile(options: &[&str], compile_targets: &[&str]) -> Result<()>{
+    let output = Command::new("javac")
         .args(options)
         .args(compile_targets)
-        // .args(arguments)
         .stdin(Stdio::inherit())
         .stdout(Stdio::inherit())
-        .spawn()
-        .expect("🌀lava: failed to execute child");
+        .spawn()?
+        .wait_with_output()?;
 
-    let output = child_compile.wait_with_output().expect("🌀lava: failed to wait on child(compilation)");
     if output.status.code().unwrap() != 0 {
-        panic!("🌀lava: compilation failed");
+        return Err(Error::new(ErrorKind::Other, "🌀lava: compilation failed"));
     }
+
+    Ok(())
 }
 
 /// Runs the java program
@@ -73,18 +82,19 @@ fn compile(options: &[&str], compile_targets: &[&str]) {
 /// * `options` - The options passed to lava
 /// * `java_file` - The java file to be compiled
 /// * `arguments` - The arguments passed to the java program
-fn run(options: &[&str], java_file: &str, arguments: &[String]) {
+fn run(options: &[&str], java_file: &str, arguments: &[String]) -> Result<()>{
     let child_run: std::process::Child = Command::new("java")
         .args(options)
         .arg(java_file.split('.').next().expect("🌀lava: no java file found"))
         .args(arguments)
         .stdin(Stdio::inherit())
         .stdout(Stdio::inherit())
-        .spawn()
-        .expect("🌀lava: failed to execute child");
+        .spawn()?;
 
-    let output = child_run.wait_with_output().expect("🌀lava: failed to wait on child(execution)");
+    let output = child_run.wait_with_output()?;
     if output.status.code().expect("🌀lava: failed to get exit code") != 0 {
-        println!("🌀lava: execution failed");
+        return Err(Error::new(ErrorKind::Other, "🌀lava: execution failed"));
     }
+
+    Ok(())
 }
